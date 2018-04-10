@@ -1,0 +1,29 @@
+pragma solidity ^0.4.18;
+contract Phone {
+    string public IMEI = "123498702323";
+    uint public number = 42238691;
+    address owner;
+    
+    function Phone(string _imei, uint _phoneNum) public {
+        IMEI = _imei;
+        number = _phoneNum;
+        owner = msg.sender;
+    }
+    
+    function getPhone() public constant returns (string, uint) {
+        return(IMEI, number);
+    }
+    
+    function setPhone(string _imei, uint _number) onlyOwner public {
+        IMEI = _imei;
+        number = _number;
+        emit NewPhone(_imei, _number);
+    }
+    
+    event NewPhone(string IMEI, uint number);
+    
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
+    }
+}

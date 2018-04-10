@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Phone</title>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <script src="./node_modules/web3/dist/web3.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Phone</h1>
+        <h2 id="phone"></h2>
+        <img id="loader" src="https://loading.io/spinners/double-ring/lg.double-ring-spinner.gif">
+        <label for="IMEI" class="col-lg-2 control-label">IMEI:</label>
+        <input id="IMEI" type="text">
+        <label for="number" class="col-lg-2 control-label">Number:</label>
+        <input id="number" type="text">
+        <button id="button">Update Phone Number</button>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script>
+        var web3 = require('web3');
+        var web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"));
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+		var PhoneContract = web3.eth.contract(
+			[
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": false,
+						"name": "IMEI",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"name": "number",
+						"type": "uint256"
+					}
+				],
+				"name": "NewPhone",
+				"type": "event"
+			},
+			{
+				"constant": false,
+				"inputs": [
+					{
+						"name": "_imei",
+						"type": "string"
+					},
+					{
+						"name": "_number",
+						"type": "uint256"
+					}
+				],
+				"name": "setPhone",
+				"outputs": [],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"name": "_imei",
+						"type": "string"
+					},
+					{
+						"name": "_phoneNum",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "getPhone",
+				"outputs": [
+					{
+						"name": "",
+						"type": "string"
+					},
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "IMEI",
+				"outputs": [
+					{
+						"name": "",
+						"type": "string"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"constant": true,
+				"inputs": [],
+				"name": "number",
+				"outputs": [
+					{
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"payable": false,
+				"stateMutability": "view",
+				"type": "function"
+			}
+		]
+		)
+		var Phone = PhoneContract.at('0x260ba7ac8182d0b64352e77bf63c44dbc9d8e609');
+  		console.log(Phone.getPhone());
+        var phoneEvent = Phone.NewPhone();
+        phoneEvent.watch(function(error, result) {
+            if (!error) {
+              $('#loader').hide();
+              $('#phone').html("There is a new phone with "+result.args.IMEI + '(' + result.args.number + ')');
+              console.log("Got an event without errors!!!")
+            } else {
+              $('#loader').hide();
+              console.log("Got and event with errors: " + error);
+            }
+        });
+        $("#button").click(function() {
+			console.log("Got IMEI: "+$("#IMEI").val()+"// Number:"+$("#number").val())
+            Phone.setPhone($("#IMEI").val(), $("#number").val());
+            console.log("Called setPhone from Phone");
+            $('#loader').show();
+        });
+    </script>
+
+</body>
+</html>
